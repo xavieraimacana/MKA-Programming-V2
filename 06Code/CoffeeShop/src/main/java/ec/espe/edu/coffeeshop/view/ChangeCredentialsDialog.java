@@ -3,6 +3,7 @@ package ec.espe.edu.coffeeshop.view;
 import ec.espe.edu.coffeeshop.model.Employee;
 import ec.espe.edu.coffeeshop.repository.MongoEmployeeRepository;
 import ec.espe.edu.coffeeshop.utils.I18nHelper;
+import ec.espe.edu.coffeeshop.utils.PasswordHasher;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -199,7 +200,7 @@ public class ChangeCredentialsDialog extends JDialog {
 
         // Actualizar datos en MongoDB
         employee.setUsername(newUsername);
-        employee.setPassword(newPassword);
+        employee.setPassword(PasswordHasher.hashPassword(newPassword));
         employee.setChangePasswordRequired(false);
         
         try {

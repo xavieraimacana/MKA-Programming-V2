@@ -3,6 +3,7 @@ package ec.espe.edu.coffeeshop;
 import ec.espe.edu.coffeeshop.model.Employee;
 import ec.espe.edu.coffeeshop.model.EmployeeRole;
 import ec.espe.edu.coffeeshop.repository.MongoEmployeeRepository;
+import ec.espe.edu.coffeeshop.utils.PasswordHasher;
 import ec.espe.edu.coffeeshop.view.LoginFrame;
 
 import javax.swing.*;
@@ -55,22 +56,31 @@ public class CoffeeShop {
             Employee emp1 = repo.findById("1");
             if (emp1 == null || emp1.getUsername() == null) {
                 System.out.println("Sembrando/Reparando admin por defecto (Anthony)...");
-                repo.save(new Employee("1", "Anthony Aimacaña", EmployeeRole.MANAGER, "anthony", "mka123", true));
+                repo.save(new Employee("1", "Anthony Aimacaña", EmployeeRole.MANAGER, "anthony", PasswordHasher.hashPassword("mka123"), true));
             }
             Employee emp2 = repo.findById("2");
             if (emp2 == null || emp2.getUsername() == null) {
                 System.out.println("Sembrando/Reparando cajero por defecto (Mateo)...");
-                repo.save(new Employee("2", "Mateo Artieda", EmployeeRole.CASHIER, "mateo", "mateo123", true));
+                repo.save(new Employee("2", "Mateo Artieda", EmployeeRole.CASHIER, "mateo", PasswordHasher.hashPassword("mateo123"), true));
             }
             Employee emp3 = repo.findById("3");
             if (emp3 == null || emp3.getUsername() == null) {
                 System.out.println("Sembrando/Reparando barista por defecto (Kevin)...");
-                repo.save(new Employee("3", "Kevin Albán", EmployeeRole.BARISTA, "kevin", "kevin123", true));
+                repo.save(new Employee("3", "Kevin Albán", EmployeeRole.BARISTA, "kevin", PasswordHasher.hashPassword("kevin123"), true));
             }
             Employee emp4 = repo.findById("4");
             if (emp4 == null || emp4.getUsername() == null) {
                 System.out.println("Sembrando/Reparando mesero por defecto...");
-                repo.save(new Employee("4", "Waiter User", EmployeeRole.WAITER, "waiter", "waiter123", true));
+                repo.save(new Employee("4", "Waiter User", EmployeeRole.WAITER, "waiter", PasswordHasher.hashPassword("waiter123"), true));
+            }
+
+            // Migración automática: si alguna contraseña de usuario existente está en texto plano, la hasheamos
+            for (Employee emp : repo.findAll()) {
+                if (emp.getPassword() != null && !emp.getPassword().startsWith("$2a$")) {
+                    System.out.println("Migrando contraseña del empleado '" + emp.getName() + "' a hash BCrypt seguro...");
+                    emp.setPassword(PasswordHasher.hashPassword(emp.getPassword()));
+                    repo.save(emp);
+                }
             }
             System.out.println("============================================");
         } catch (Exception e) {

@@ -6,6 +6,7 @@ import com.mongodb.client.model.Filters;
 import com.mongodb.client.model.ReplaceOptions;
 import ec.espe.edu.coffeeshop.model.Employee;
 import ec.espe.edu.coffeeshop.model.EmployeeRole;
+import ec.espe.edu.coffeeshop.utils.PasswordHasher;
 import org.bson.Document;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,14 +47,15 @@ public class MongoEmployeeRepository implements EmployeeRepository {
 
     @Override
     public Employee findByCredentials(String username, String password) {
-        Document doc = collection.find(Filters.and(
-            Filters.eq("username", username),
-            Filters.eq("password", password)
-        )).first();
+        Document doc = collection.find(Filters.eq("username", username)).first();
         if (doc == null) {
             return null;
         }
-        return documentToEmployee(doc);
+        Employee employee = documentToEmployee(doc);
+        if (PasswordHasher.checkPassword(password, employee.getPassword())) {
+            return employee;
+        }
+        return null;
     }
 
     @Override

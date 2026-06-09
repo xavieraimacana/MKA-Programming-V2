@@ -17,5 +17,11 @@
             <artifactId>mongodb-driver-sync</artifactId>
             <version>5.1.0</version>
         </dependency>
+        <!-- BCrypt Hashing Dependency -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
     </dependencies>
 </project>
