@@ -27,15 +27,28 @@ public class MongoEmployeeRepository implements EmployeeRepository {
     public void save(Employee employee) {
         Document doc = new Document("_id", employee.getId())
                 .append("name", employee.getName())
-                .append("role", employee.getRole().name());
+                .append("role", employee.getRole().name())
+                .append("username", employee.getUsername())
+                .append("password", employee.getPassword());
         
-        // Ejecuta un reemplazo upsert (inserta si no existe, actualiza si existe)
         collection.replaceOne(Filters.eq("_id", employee.getId()), doc, new ReplaceOptions().upsert(true));
     }
 
     @Override
     public Employee findById(String id) {
         Document doc = collection.find(Filters.eq("_id", id)).first();
+        if (doc == null) {
+            return null;
+        }
+        return documentToEmployee(doc);
+    }
+
+    @Override
+    public Employee findByCredentials(String username, String password) {
+        Document doc = collection.find(Filters.and(
+            Filters.eq("username", username),
+            Filters.eq("password", password)
+        )).first();
         if (doc == null) {
             return null;
         }
@@ -61,6 +74,8 @@ public class MongoEmployeeRepository implements EmployeeRepository {
         employee.setId(doc.getString("_id"));
         employee.setName(doc.getString("name"));
         employee.setRole(EmployeeRole.valueOf(doc.getString("role")));
+        employee.setUsername(doc.getString("username"));
+        employee.setPassword(doc.getString("password"));
         return employee;
     }
 }

@@ -1,7 +1,7 @@
 package ec.espe.edu.coffeeshop.model;
 
 /**
- * Represents an employee in the coffeeshop.
+ * Represents an employee in the coffeeshop with credentials.
  * 
  * @author Anthony Aimacaña, MKA Programer, @ESPE
  */
@@ -9,13 +9,17 @@ public class Employee {
     private String id;
     private String name;
     private EmployeeRole role;
+    private String username;
+    private String password;
 
     public Employee() {}
 
-    public Employee(String id, String name, EmployeeRole role) {
+    public Employee(String id, String name, EmployeeRole role, String username, String password) {
         this.id = id;
         this.name = name;
         this.role = role;
+        this.username = username;
+        this.password = password;
     }
 
     public String getId() {
@@ -40,5 +44,21 @@ public class Employee {
 
     public void setRole(EmployeeRole role) {
         this.role = role;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }
