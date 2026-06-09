@@ -1,18 +1,19 @@
 package ec.espe.edu.coffeeshop.discount;
 
+import ec.espe.edu.coffeeshop.model.Order;
 import java.math.BigDecimal;
 
 /**
- * Strategy interface for applying dynamic discount rates.
+ * Strategy interface for calculating dynamic discounts on an order.
  * 
- * @author Anthony Aimacaña, MKA Programer, @ESPE
+ * @author Mateo Artieda, MKA Programmer, @ESPE
  */
 public interface Discount {
     /**
-     * Calculates the discounted total based on the strategy.
+     * Calculates the discount amount for a given order.
      * 
-     * @param amount The original total amount.
-     * @return The discounted total amount.
+     * @param order The order to apply the discount to.
+     * @return The calculated discount amount.
      */
-    BigDecimal applyDiscount(BigDecimal amount);
+    BigDecimal calculateDiscount(Order order);
 }
