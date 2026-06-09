@@ -1,7 +1,7 @@
 package ec.espe.edu.coffeeshop.model;
 
 /**
- * Represents an employee in the coffeeshop with credentials.
+ * Represents an employee with credentials and security configuration.
  * 
  * @author Anthony Aimacaña, MKA Programer, @ESPE
  */
@@ -11,15 +11,17 @@ public class Employee {
     private EmployeeRole role;
     private String username;
     private String password;
+    private boolean changePasswordRequired;
 
     public Employee() {}
 
-    public Employee(String id, String name, EmployeeRole role, String username, String password) {
+    public Employee(String id, String name, EmployeeRole role, String username, String password, boolean changePasswordRequired) {
         this.id = id;
         this.name = name;
         this.role = role;
         this.username = username;
         this.password = password;
+        this.changePasswordRequired = changePasswordRequired;
     }
 
     public String getId() {
@@ -60,5 +62,13 @@ public class Employee {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isChangePasswordRequired() {
+        return changePasswordRequired;
+    }
+
+    public void setChangePasswordRequired(boolean changePasswordRequired) {
+        this.changePasswordRequired = changePasswordRequired;
     }
 }

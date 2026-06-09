@@ -29,7 +29,8 @@ public class MongoEmployeeRepository implements EmployeeRepository {
                 .append("name", employee.getName())
                 .append("role", employee.getRole().name())
                 .append("username", employee.getUsername())
-                .append("password", employee.getPassword());
+                .append("password", employee.getPassword())
+                .append("changePasswordRequired", employee.isChangePasswordRequired());
         
         collection.replaceOne(Filters.eq("_id", employee.getId()), doc, new ReplaceOptions().upsert(true));
     }
@@ -76,6 +77,9 @@ public class MongoEmployeeRepository implements EmployeeRepository {
         employee.setRole(EmployeeRole.valueOf(doc.getString("role")));
         employee.setUsername(doc.getString("username"));
         employee.setPassword(doc.getString("password"));
+        
+        // Asume false por defecto si el campo no existe en el documento
+        employee.setChangePasswordRequired(doc.getBoolean("changePasswordRequired", false));
         return employee;
     }
 }

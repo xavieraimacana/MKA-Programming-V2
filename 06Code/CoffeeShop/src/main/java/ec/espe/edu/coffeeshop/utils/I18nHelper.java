@@ -33,4 +33,13 @@ public class I18nHelper {
             return key; // Retorna la llave como respaldo en caso de error
         }
     }
+
+    /**
+     * Gets the current locale of the ResourceBundle.
+     * 
+     * @return The current Locale.
+     */
+    public static Locale getLocale() {
+        return messages.getLocale();
+    }
 }

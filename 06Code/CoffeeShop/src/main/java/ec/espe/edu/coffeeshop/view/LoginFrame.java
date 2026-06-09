@@ -15,6 +15,7 @@ import java.util.Locale;
  * Modern, custom-styled Swing Login GUI for the Coffeeshop system.
  * Uses a warm dark theme aligned with coffeeshop aesthetics.
  * Supports credentials login (username and password) and flat i18n toggles.
+ * Prompts for credentials update on first-time login.
  * 
  * @author Anthony Aimacaña, MKA Programer, @ESPE
  */
@@ -204,7 +205,14 @@ public class LoginFrame extends JFrame {
         
         // Update error text if it was active
         if (!errorLabel.getText().isEmpty()) {
-            errorLabel.setText(I18nHelper.getMessage("error.employee_not_found"));
+            // Check if error is password mismatch or employee not found to localized properly
+            if (errorLabel.getText().equals("Passwords do not match!") || errorLabel.getText().equals("¡Las contraseñas no coinciden!")) {
+                errorLabel.setText(I18nHelper.getMessage("error.password_mismatch"));
+            } else if (errorLabel.getText().equals("Credentials updated successfully! Please log in again.") || errorLabel.getText().equals("¡Credenciales actualizadas con éxito! Inicie sesión nuevamente.")) {
+                errorLabel.setText(I18nHelper.getMessage("login.change_success"));
+            } else {
+                errorLabel.setText(I18nHelper.getMessage("error.employee_not_found"));
+            }
         }
     }
 
@@ -223,7 +231,20 @@ public class LoginFrame extends JFrame {
         if (employee == null) {
             errorLabel.setText(I18nHelper.getMessage("error.employee_not_found"));
         } else {
-            // Login Exitoso
+            // Verificar si requiere cambiar credenciales
+            if (employee.isChangePasswordRequired()) {
+                boolean changed = showChangeCredentialsDialog(employee);
+                if (changed) {
+                    // Limpiar campos y forzar login con las nuevas credenciales
+                    usernameField.setText("");
+                    passwordField.setText("");
+                    errorLabel.setForeground(new Color(34, 197, 94)); // Green 500 for success
+                    errorLabel.setText(I18nHelper.getMessage("login.change_success"));
+                }
+                return;
+            }
+
+            // Login Exitoso normal
             JOptionPane.showMessageDialog(this,
                 I18nHelper.getMessage("login.success") + " " + employee.getName() + "\nRole: " + employee.getRole(),
                 "Success",
@@ -237,5 +258,14 @@ public class LoginFrame extends JFrame {
             MongoDBConnection.getInstance().close();
             System.exit(0);
         }
+    }
+
+    /**
+     * Shows a customized modal dialog prompting the user to update default credentials.
+     */
+    private boolean showChangeCredentialsDialog(Employee employee) {
+        ChangeCredentialsDialog dialog = new ChangeCredentialsDialog(this, employee, this.employeeRepo);
+        dialog.setVisible(true);
+        return dialog.isSucceeded();
     }
 }
