@@ -18,7 +18,7 @@ public class MongoDBConnection {
         // En producción, estos valores deben leerse de variables de entorno o archivos de configuración (.properties)
         String connectionString = System.getenv("MONGODB_URI");
         if (connectionString == null || connectionString.isEmpty()) {
-            connectionString = "mongodb://localhost:27017";
+            connectionString = "mongodb://coffeeshop:coffeeshopMKA@157.137.223.54:27017/coffeeshop?authSource=coffeeshop";
         }
         
         String databaseName = "coffeeshop";
