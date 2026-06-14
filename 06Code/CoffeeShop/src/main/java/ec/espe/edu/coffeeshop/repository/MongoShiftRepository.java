@@ -57,10 +57,10 @@ public class MongoShiftRepository implements ShiftRepository {
         Document doc = new Document("_id", shift.getId())
                 .append("cashierName", shift.getCashierName())
                 .append("startTime", Date.from(shift.getStartTime().atZone(ZoneId.systemDefault()).toInstant()))
-                .append("startingCash", shift.getStartingCash().toString())
-                .append("declaredEndingCash", shift.getDeclaredEndingCash().toString())
-                .append("systemEndingCash", shift.getSystemEndingCash().toString())
-                .append("difference", shift.getDifference().toString());
+                .append("startingCash", shift.getStartingCash() != null ? shift.getStartingCash().toString() : "0.0")
+                .append("declaredEndingCash", shift.getDeclaredEndingCash() != null ? shift.getDeclaredEndingCash().toString() : null)
+                .append("systemEndingCash", shift.getSystemEndingCash() != null ? shift.getSystemEndingCash().toString() : null)
+                .append("difference", shift.getDifference() != null ? shift.getDifference().toString() : null);
 
         if (shift.getEndTime() != null) {
             doc.append("endTime", Date.from(shift.getEndTime().atZone(ZoneId.systemDefault()).toInstant()));
@@ -78,10 +78,10 @@ public class MongoShiftRepository implements ShiftRepository {
         shift.setId(doc.getString("_id"));
         shift.setCashierName(doc.getString("cashierName"));
         shift.setStartTime(doc.getDate("startTime").toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
-        shift.setStartingCash(new BigDecimal(doc.getString("startingCash")));
-        shift.setDeclaredEndingCash(new BigDecimal(doc.getString("declaredEndingCash")));
-        shift.setSystemEndingCash(new BigDecimal(doc.getString("systemEndingCash")));
-        shift.setDifference(new BigDecimal(doc.getString("difference")));
+        shift.setStartingCash(doc.getString("startingCash") != null ? new BigDecimal(doc.getString("startingCash")) : BigDecimal.ZERO);
+        shift.setDeclaredEndingCash(doc.getString("declaredEndingCash") != null ? new BigDecimal(doc.getString("declaredEndingCash")) : null);
+        shift.setSystemEndingCash(doc.getString("systemEndingCash") != null ? new BigDecimal(doc.getString("systemEndingCash")) : null);
+        shift.setDifference(doc.getString("difference") != null ? new BigDecimal(doc.getString("difference")) : null);
 
         Date endTime = doc.getDate("endTime");
         if (endTime != null) {

@@ -7,6 +7,8 @@ import com.mongodb.client.model.ReplaceOptions;
 import ec.espe.edu.coffeeshop.model.Product;
 import ec.espe.edu.coffeeshop.model.ProductCategory;
 import ec.espe.edu.coffeeshop.model.Recipe;
+import ec.espe.edu.coffeeshop.model.RecipeItem;
+import ec.espe.edu.coffeeshop.model.Ingredient;
 import org.bson.Document;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -28,10 +30,19 @@ public class MongoProductRepository implements ProductRepository {
 
     @Override
     public void save(Product product) {
+        List<Document> recipeItemsDocs = new ArrayList<>();
+        if (product.getRecipe() != null && product.getRecipe().getItems() != null) {
+            for (RecipeItem item : product.getRecipe().getItems()) {
+                recipeItemsDocs.add(new Document("ingredientId", item.getIngredient().getId())
+                        .append("quantityNeeded", item.getQuantityNeeded()));
+            }
+        }
+        
         Document doc = new Document("_id", product.getId())
                 .append("name", product.getName())
                 .append("price", product.getPrice().toString())
-                .append("category", product.getCategory().name());
+                .append("category", product.getCategory().name())
+                .append("recipe", new Document("items", recipeItemsDocs));
         
         collection.replaceOne(Filters.eq("_id", product.getId()), doc, new ReplaceOptions().upsert(true));
     }
@@ -63,6 +74,25 @@ public class MongoProductRepository implements ProductRepository {
         product.setName(doc.getString("name"));
         product.setPrice(new BigDecimal(doc.getString("price")));
         product.setCategory(ProductCategory.valueOf(doc.getString("category")));
+        
+        Document recipeDoc = doc.get("recipe", Document.class);
+        if (recipeDoc != null) {
+            Recipe recipe = new Recipe();
+            List<Document> itemsDocs = recipeDoc.getList("items", Document.class);
+            if (itemsDocs != null) {
+                // Instanciamos el repositorio de ingredientes localmente para resolver referencias
+                MongoIngredientRepository ingRepo = new MongoIngredientRepository();
+                for (Document itemDoc : itemsDocs) {
+                    String ingId = itemDoc.getString("ingredientId");
+                    Double qty = itemDoc.getDouble("quantityNeeded");
+                    ec.espe.edu.coffeeshop.model.Ingredient ing = ingRepo.findById(ingId);
+                    if (ing != null) {
+                        recipe.getItems().add(new RecipeItem(ing, qty));
+                    }
+                }
+            }
+            product.setRecipe(recipe);
+        }
         return product;
     }
 }

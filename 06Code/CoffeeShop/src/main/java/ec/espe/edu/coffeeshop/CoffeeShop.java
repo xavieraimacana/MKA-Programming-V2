@@ -1,12 +1,15 @@
 package ec.espe.edu.coffeeshop;
 
-import ec.espe.edu.coffeeshop.model.Employee;
-import ec.espe.edu.coffeeshop.model.EmployeeRole;
-import ec.espe.edu.coffeeshop.repository.MongoEmployeeRepository;
+import ec.espe.edu.coffeeshop.model.*;
+import ec.espe.edu.coffeeshop.repository.*;
 import ec.espe.edu.coffeeshop.utils.PasswordHasher;
 import ec.espe.edu.coffeeshop.view.LoginFrame;
 
 import javax.swing.*;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Main entry point for the Coffeeshop Management System.
@@ -17,75 +20,19 @@ import javax.swing.*;
 public class CoffeeShop {
 
     public static void main(String[] args) {
-        // 1. Conectar y sembrar base de datos remota si está vacía
-        MongoEmployeeRepository employeeRepo = new MongoEmployeeRepository();
-        seedDatabaseIfEmpty(employeeRepo);
+        // 1. Connect and seed MongoDB collections via DatabaseSeeder
+        ec.espe.edu.coffeeshop.utils.DatabaseSeeder.seed();
 
-        // 2. Iniciar la interfaz gráfica de usuario (GUI) en el Event Dispatch Thread
+        // 2. Launch GUI
         SwingUtilities.invokeLater(() -> {
             try {
-                // Configurar Look & Feel del sistema operativo para una integración visual óptima
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             } catch (Exception e) {
-                // Fallback al look and feel básico si falla
+                // Fallback Look & Feel
             }
             
             LoginFrame loginFrame = new LoginFrame();
             loginFrame.setVisible(true);
         });
-    }
-
-    /**
-     * Seeds default employees into the MongoDB collection if it is currently empty.
-     * Sets changePasswordRequired to true for all default users.
-     */
-    private static void seedDatabaseIfEmpty(MongoEmployeeRepository repo) {
-        try {
-            System.out.println("=== DIAGNOSTICO DE EMPLEADOS EN MONGODB ===");
-            java.util.List<Employee> employees = repo.findAll();
-            if (employees.isEmpty()) {
-                System.out.println("La coleccion esta vacia. Sembrando empleados por defecto...");
-            } else {
-                System.out.println("Empleados registrados actualmente (" + employees.size() + "):");
-                for (Employee emp : employees) {
-                    System.out.println(" - ID: " + emp.getId() + " | Nombre: " + emp.getName() + " | Usuario: " + emp.getUsername() + " | Rol: " + emp.getRole() + " | Requiere Cambio: " + emp.isChangePasswordRequired());
-                }
-            }
-
-            // Siembra robusta: si no existe cada ID individualmente o si el registro es obsoleto (username es null), lo reparamos/sembramos
-            Employee emp1 = repo.findById("1");
-            if (emp1 == null || emp1.getUsername() == null) {
-                System.out.println("Sembrando/Reparando admin por defecto (Anthony)...");
-                repo.save(new Employee("1", "Anthony Aimacaña", EmployeeRole.MANAGER, "anthony", PasswordHasher.hashPassword("mka123"), true));
-            }
-            Employee emp2 = repo.findById("2");
-            if (emp2 == null || emp2.getUsername() == null) {
-                System.out.println("Sembrando/Reparando cajero por defecto (Mateo)...");
-                repo.save(new Employee("2", "Mateo Artieda", EmployeeRole.CASHIER, "mateo", PasswordHasher.hashPassword("mateo123"), true));
-            }
-            Employee emp3 = repo.findById("3");
-            if (emp3 == null || emp3.getUsername() == null) {
-                System.out.println("Sembrando/Reparando barista por defecto (Kevin)...");
-                repo.save(new Employee("3", "Kevin Albán", EmployeeRole.BARISTA, "kevin", PasswordHasher.hashPassword("kevin123"), true));
-            }
-            Employee emp4 = repo.findById("4");
-            if (emp4 == null || emp4.getUsername() == null) {
-                System.out.println("Sembrando/Reparando mesero por defecto...");
-                repo.save(new Employee("4", "Waiter User", EmployeeRole.WAITER, "waiter", PasswordHasher.hashPassword("waiter123"), true));
-            }
-
-            // Migración automática: si alguna contraseña de usuario existente está en texto plano, la hasheamos
-            for (Employee emp : repo.findAll()) {
-                if (emp.getPassword() != null && !emp.getPassword().startsWith("$2a$")) {
-                    System.out.println("Migrando contraseña del empleado '" + emp.getName() + "' a hash BCrypt seguro...");
-                    emp.setPassword(PasswordHasher.hashPassword(emp.getPassword()));
-                    repo.save(emp);
-                }
-            }
-            System.out.println("============================================");
-        } catch (Exception e) {
-            System.err.println("No se pudo conectar o sembrar la base de datos: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 }

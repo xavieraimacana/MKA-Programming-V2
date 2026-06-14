@@ -12,7 +12,7 @@ import java.awt.event.ActionEvent;
 
 /**
  * Custom, premium styled JDialog for updating employee credentials.
- * Matches the dark stone and amber color palette of the LoginFrame.
+ * Matches the light warm sand and gold color palette.
  * 
  * @author Anthony Aimacaña, MKA Programer, @ESPE
  */
@@ -33,6 +33,14 @@ public class ChangeCredentialsDialog extends JDialog {
     private JButton saveButton;
     private JButton cancelButton;
 
+    // Colors
+    private final Color bgColor = new Color(250, 248, 245); // Warm White
+    private final Color inputColor = new Color(255, 255, 255); // Pure White
+    private final Color textColor = new Color(41, 37, 36); // Dark Gray
+    private final Color goldPrimary = new Color(197, 160, 89); // Gold Primary
+    private final Color goldSecondary = new Color(163, 128, 62); // Dark Gold
+    private final Color borderColor = new Color(224, 220, 214); // Sand Border
+
     public ChangeCredentialsDialog(Frame parent, Employee employee, MongoEmployeeRepository employeeRepo) {
         super(parent, I18nHelper.getMessage("login.change_pwd_title"), true);
         this.employee = employee;
@@ -42,9 +50,9 @@ public class ChangeCredentialsDialog extends JDialog {
         setLocationRelativeTo(parent);
         setResizable(false);
         
-        // Dark theme layout
+        // Light theme layout
         JPanel contentPanel = new JPanel(new GridBagLayout());
-        contentPanel.setBackground(new Color(28, 25, 23)); // Stone 900
+        contentPanel.setBackground(bgColor);
         contentPanel.setBorder(new EmptyBorder(25, 30, 25, 30));
         setContentPane(contentPanel);
 
@@ -60,7 +68,7 @@ public class ChangeCredentialsDialog extends JDialog {
         // Title
         titleLabel = new JLabel(I18nHelper.getMessage("login.change_pwd_title"), JLabel.CENTER);
         titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        titleLabel.setForeground(new Color(245, 158, 11)); // Amber 500
+        titleLabel.setForeground(goldSecondary);
         gbc.gridy = 0;
         gbc.gridwidth = 2;
         panel.add(titleLabel, gbc);
@@ -75,7 +83,7 @@ public class ChangeCredentialsDialog extends JDialog {
         // Username Label
         userLabel = new JLabel(I18nHelper.getMessage("login.new_username"));
         userLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        userLabel.setForeground(new Color(231, 229, 228)); // Stone 200
+        userLabel.setForeground(textColor);
         gbc.gridy = 2;
         panel.add(userLabel, gbc);
 
@@ -88,7 +96,7 @@ public class ChangeCredentialsDialog extends JDialog {
         // Password Label
         passLabel = new JLabel(I18nHelper.getMessage("login.new_password"));
         passLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        passLabel.setForeground(new Color(231, 229, 228)); // Stone 200
+        passLabel.setForeground(textColor);
         gbc.gridy = 4;
         panel.add(passLabel, gbc);
 
@@ -101,7 +109,7 @@ public class ChangeCredentialsDialog extends JDialog {
         // Confirm Password Label
         confirmLabel = new JLabel(I18nHelper.getMessage("login.confirm_password"));
         confirmLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        confirmLabel.setForeground(new Color(231, 229, 228)); // Stone 200
+        confirmLabel.setForeground(textColor);
         gbc.gridy = 6;
         panel.add(confirmLabel, gbc);
 
@@ -114,7 +122,7 @@ public class ChangeCredentialsDialog extends JDialog {
         // Error Label
         errorLabel = new JLabel("", JLabel.CENTER);
         errorLabel.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        errorLabel.setForeground(new Color(239, 68, 68)); // Red 500
+        errorLabel.setForeground(new Color(220, 38, 38)); // Red 600
         gbc.gridy = 8;
         panel.add(errorLabel, gbc);
 
@@ -124,13 +132,13 @@ public class ChangeCredentialsDialog extends JDialog {
 
         // Buttons Panel (Horizontal layout for Save and Cancel)
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2, 10, 0));
-        buttonPanel.setBackground(new Color(28, 25, 23));
+        buttonPanel.setBackground(bgColor);
 
         String saveText = I18nHelper.getLocale().getLanguage().equals("es") ? "Guardar" : "Save";
         String cancelText = I18nHelper.getLocale().getLanguage().equals("es") ? "Cancelar" : "Cancel";
 
         saveButton = new JButton(saveText);
-        saveButton.setBackground(new Color(217, 119, 6)); // Amber 600
+        saveButton.setBackground(goldPrimary);
         saveButton.setForeground(Color.WHITE);
         saveButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         saveButton.setFocusPainted(false);
@@ -141,7 +149,7 @@ public class ChangeCredentialsDialog extends JDialog {
         saveButton.addActionListener(this::onSaveClicked);
 
         cancelButton = new JButton(cancelText);
-        cancelButton.setBackground(new Color(68, 64, 60)); // Stone 600
+        cancelButton.setBackground(new Color(120, 113, 108)); // Muted Gray
         cancelButton.setForeground(Color.WHITE);
         cancelButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
         cancelButton.setFocusPainted(false);
@@ -160,12 +168,12 @@ public class ChangeCredentialsDialog extends JDialog {
     }
 
     private void styleTextField(JTextField field) {
-        field.setBackground(new Color(41, 37, 36)); // Stone 800
-        field.setForeground(Color.WHITE);
-        field.setCaretColor(Color.WHITE);
+        field.setBackground(inputColor);
+        field.setForeground(textColor);
+        field.setCaretColor(textColor);
         field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         field.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(68, 64, 60), 1),
+            BorderFactory.createLineBorder(borderColor, 1),
             BorderFactory.createEmptyBorder(6, 10, 6, 10)
         ));
     }

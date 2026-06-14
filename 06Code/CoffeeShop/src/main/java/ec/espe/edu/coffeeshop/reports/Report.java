@@ -10,4 +10,9 @@ public interface Report {
      * Generates the report and displays it or saves it.
      */
     void generateReport();
+
+    /**
+     * Generates and returns the report content as formatted text.
+     */
+    String getReportText();
 }

@@ -22,6 +22,11 @@ public class SalesReport implements Report {
 
     @Override
     public void generateReport() {
+        System.out.println(getReportText());
+    }
+
+    @Override
+    public String getReportText() {
         List<Invoice> invoices = invoiceRepository.findAll();
         Map<String, Integer> productSales = new HashMap<>();
 
@@ -34,14 +39,16 @@ public class SalesReport implements Report {
             }
         }
 
-        System.out.println("---------- BEST-SELLING PRODUCTS ----------");
-        System.out.printf("%-30s | %-10s%n", "Product", "Quantity Sold");
-        System.out.println("---------------------------------------------");
+        StringBuilder sb = new StringBuilder();
+        sb.append("---------- BEST-SELLING PRODUCTS ----------\n");
+        sb.append(String.format("%-30s | %-10s%n", "Product", "Quantity Sold"));
+        sb.append("---------------------------------------------\n");
 
         productSales.entrySet().stream()
                 .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue()))
-                .forEach(entry -> System.out.printf("%-30s | %-10d%n", entry.getKey(), entry.getValue()));
+                .forEach(entry -> sb.append(String.format("%-30s | %-10d%n", entry.getKey(), entry.getValue())));
 
-        System.out.println("---------------------------------------------");
+        sb.append("---------------------------------------------\n");
+        return sb.toString();
     }
 }

@@ -19,17 +19,24 @@ public class InventoryReport implements Report {
 
     @Override
     public void generateReport() {
-        List<Ingredient> ingredients = ingredientRepository.findAll();
+        System.out.println(getReportText());
+    }
 
-        System.out.println("---------- INVENTORY STOCK REPORT ----------");
-        System.out.printf("%-20s | %-10s | %-10s | %-10s%n", "Ingredient", "Stock", "Min Alert", "Status");
-        System.out.println("------------------------------------------------------------");
+    @Override
+    public String getReportText() {
+        List<Ingredient> ingredients = ingredientRepository.findAll();
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("---------- INVENTORY STOCK REPORT ----------\n");
+        sb.append(String.format("%-20s | %-10s | %-10s | %-10s%n", "Ingredient", "Stock", "Min Alert", "Status"));
+        sb.append("------------------------------------------------------------\n");
 
         for (Ingredient ing : ingredients) {
             String status = (ing.getStock() < ing.getMinimumAlertQuantity()) ? "LOW STOCK" : "OK";
-            System.out.printf("%-20s | %-10.3f | %-10.3f | %-10s%n", 
-                              ing.getName(), ing.getStock(), ing.getMinimumAlertQuantity(), status);
+            sb.append(String.format("%-20s | %-10.3f | %-10.3f | %-10s%n", 
+                              ing.getName(), ing.getStock(), ing.getMinimumAlertQuantity(), status));
         }
-        System.out.println("------------------------------------------------------------");
+        sb.append("------------------------------------------------------------\n");
+        return sb.toString();
     }
 }

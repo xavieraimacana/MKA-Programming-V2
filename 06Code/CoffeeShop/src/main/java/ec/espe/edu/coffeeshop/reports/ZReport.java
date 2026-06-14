@@ -20,19 +20,26 @@ public class ZReport implements Report {
 
     @Override
     public void generateReport() {
+        System.out.println(getReportText());
+    }
+
+    @Override
+    public String getReportText() {
         List<Invoice> invoices = invoiceRepository.findAll();
         BigDecimal grandTotal = BigDecimal.ZERO;
         BigDecimal taxTotal = BigDecimal.ZERO;
 
-        System.out.println("---------- Z-REPORT (TOTAL SALES) ----------");
+        StringBuilder sb = new StringBuilder();
+        sb.append("---------- Z-REPORT (TOTAL SALES) ----------\n");
         for (Invoice inv : invoices) {
             grandTotal = grandTotal.add(inv.getTotal());
             taxTotal = taxTotal.add(inv.getTax());
         }
 
-        System.out.println("Total Invoices: " + invoices.size());
-        System.out.println("Tax Total:      $" + taxTotal);
-        System.out.println("GRAND TOTAL:    $" + grandTotal);
-        System.out.println("--------------------------------------------");
+        sb.append("Total Invoices: ").append(invoices.size()).append("\n");
+        sb.append("Tax Total:      $").append(taxTotal).append("\n");
+        sb.append("GRAND TOTAL:    $").append(grandTotal).append("\n");
+        sb.append("--------------------------------------------\n");
+        return sb.toString();
     }
 }
