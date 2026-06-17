@@ -1,37 +1,31 @@
 package ec.espe.edu.coffeeshop.model;
-
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Represents a recipe containing a list of recipe items.
- * 
- * @author Anthony Aimacaña, MKA Programer, @ESPE
- */
+import java.util.stream.Collectors;
 public class Recipe {
-    private String id;
-    private List<RecipeItem> items = new ArrayList<>();
-
-    public Recipe() {}
-
-    public Recipe(String id, List<RecipeItem> items) {
-        this.id = id;
-        this.items = items;
+    private String recipeId;
+    private String instructions;
+    private List<RecipeIngredient> ingredients;
+    public Recipe() {
+        this.ingredients = new ArrayList<>();
     }
-
-    public String getId() {
-        return id;
+    public Recipe(String recipeId, String instructions) {
+        this.recipeId = recipeId;
+        this.instructions = instructions;
+        this.ingredients = new ArrayList<>();
     }
-
-    public void setId(String id) {
-        this.id = id;
+    public String getRecipeId() { return recipeId; }
+    public void setRecipeId(String recipeId) { this.recipeId = recipeId; }
+    public String getInstructions() { return instructions; }
+    public void setInstructions(String instructions) { this.instructions = instructions; }
+    public List<RecipeIngredient> getIngredients() { return ingredients; }
+    public void setIngredients(List<RecipeIngredient> ingredients) { this.ingredients = ingredients; }
+    public void addIngredient(String itemId, double qty, UnitOfMeasure unit) {
+        this.ingredients.add(new RecipeIngredient(itemId, qty, unit));
     }
-
-    public List<RecipeItem> getItems() {
-        return items;
-    }
-
-    public void setItems(List<RecipeItem> items) {
-        this.items = items;
+    public void removeIngredient(String itemId) {
+        this.ingredients = this.ingredients.stream()
+                .filter(i -> !i.getItemId().equals(itemId))
+                .collect(Collectors.toList());
     }
 }

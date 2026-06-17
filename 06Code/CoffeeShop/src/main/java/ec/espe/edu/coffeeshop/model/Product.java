@@ -1,66 +1,33 @@
 package ec.espe.edu.coffeeshop.model;
-
-import java.math.BigDecimal;
-
-/**
- * Abstract class representing a menu item in the Coffeeshop.
- * 
- * @author Anthony Aimacaña, MKA Programer, @ESPE
- */
-public abstract class Product {
-    private String id;
+public class Product {
+    private String productId;
     private String name;
-    private BigDecimal price;
-    private ProductCategory category;
-    private Recipe recipe;
-
+    private double basePrice;
+    private boolean available;
     public Product() {}
-
-    public Product(String id, String name, BigDecimal price, ProductCategory category, Recipe recipe) {
-        this.id = id;
+    public Product(String productId, String name, double basePrice, boolean available) {
+        this.productId = productId;
         this.name = name;
-        this.price = price;
-        this.category = category;
-        this.recipe = recipe;
+        this.basePrice = basePrice;
+        this.available = available;
     }
-
-    public String getId() {
-        return id;
+    public String getProductId() { return productId; }
+    public void setProductId(String productId) { this.productId = productId; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public double getBasePrice() { return basePrice; }
+    public void setBasePrice(double basePrice) { this.basePrice = basePrice; }
+    public boolean isAvailable() { return available; }
+    public void setAvailable(boolean available) { this.available = available; }
+    public void updatePrice(double newPrice) {
+        if (newPrice < 0) throw new IllegalArgumentException("Price cannot be negative");
+        this.basePrice = newPrice;
     }
-
-    public void setId(String id) {
-        this.id = id;
+    public void toggleAvailability() {
+        this.available = !this.available;
     }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public ProductCategory getCategory() {
-        return category;
-    }
-
-    public void setCategory(ProductCategory category) {
-        this.category = category;
-    }
-
-    public Recipe getRecipe() {
-        return recipe;
-    }
-
-    public void setRecipe(Recipe recipe) {
-        this.recipe = recipe;
+    @Override
+    public String toString() {
+        return name + " - $" + basePrice;
     }
 }

@@ -1,111 +1,68 @@
 package ec.espe.edu.coffeeshop.model;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-/**
- * Represents a fiscal invoice for a completed order.
- * 
- * @author Mateo Artieda, MKA Programmer, @ESPE
- */
 public class Invoice {
-    private String id;
-    private String invoiceNumber;
-    private LocalDateTime date;
-    private String clientName;
-    private String clientTaxId;
+    private String invoiceId;
     private Order order;
-    private BigDecimal subtotal;
-    private BigDecimal tax;
-    private BigDecimal total;
-
-    public Invoice() {
-        this.date = LocalDateTime.now();
-    }
-
-    public Invoice(String id, String invoiceNumber, Order order) {
-        this.id = id;
-        this.invoiceNumber = invoiceNumber;
+    private LocalDateTime issueDate;
+    private double subtotal;
+    private double taxAmount;
+    private double totalAmount;
+    private static final double TAX_RATE = 0.15; 
+    public Invoice(String invoiceId, Order order, LocalDateTime issueDate) {
+        this.invoiceId = invoiceId;
         this.order = order;
-        this.date = LocalDateTime.now();
-        if (order.getClient() != null) {
-            this.clientName = order.getClient().getName();
-            this.clientTaxId = order.getClient().getTaxId();
+        this.issueDate = issueDate;
+        calculateSubtotal();
+        calculateTaxes();
+    }
+    private void calculateSubtotal() {
+        this.subtotal = 0;
+        if (order != null && order.getItems() != null) {
+            for (OrderItem item : order.getItems()) {
+                this.subtotal += item.getSubtotal();
+            }
         }
-        this.subtotal = order.getSubtotal();
-        this.tax = order.getTax();
-        this.total = order.getTotal();
     }
-
-    public String getId() {
-        return id;
+    public void calculateTaxes() {
+        this.taxAmount = this.subtotal * TAX_RATE;
+        this.totalAmount = this.subtotal + this.taxAmount;
     }
-
-    public void setId(String id) {
-        this.id = id;
+    public String generateFiscalReceipt() {
+        StringBuilder receipt = new StringBuilder();
+        receipt.append("======================\n");
+        receipt.append("       INVOICE        \n");
+        receipt.append("======================\n");
+        receipt.append("Invoice ID: ").append(invoiceId).append("\n");
+        receipt.append("Date: ").append(issueDate.toString()).append("\n");
+        receipt.append("----------------------\n");
+        if (order != null && order.getItems() != null) {
+            for (OrderItem item : order.getItems()) {
+                receipt.append(item.getProduct().getName())
+                       .append(" x").append(item.getQuantity())
+                       .append(" - $").append(String.format("%.2f", item.getSubtotal())).append("\n");
+            }
+        }
+        receipt.append("----------------------\n");
+        receipt.append("Subtotal: $").append(String.format("%.2f", subtotal)).append("\n");
+        receipt.append("Tax (15%): $").append(String.format("%.2f", taxAmount)).append("\n");
+        receipt.append("Total: $").append(String.format("%.2f", totalAmount)).append("\n");
+        receipt.append("======================\n");
+        return receipt.toString();
     }
-
-    public String getInvoiceNumber() {
-        return invoiceNumber;
+    public void triggerInventoryDeduction() {
+        System.out.println("Triggering inventory deduction for Invoice: " + invoiceId);
     }
-
-    public void setInvoiceNumber(String invoiceNumber) {
-        this.invoiceNumber = invoiceNumber;
+    public String getInvoiceId() { return invoiceId; }
+    public void setInvoiceId(String invoiceId) { this.invoiceId = invoiceId; }
+    public Order getOrder() { return order; }
+    public void setOrder(Order order) { 
+        this.order = order; 
+        calculateSubtotal();
+        calculateTaxes();
     }
-
-    public LocalDateTime getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
-
-    public String getClientName() {
-        return clientName;
-    }
-
-    public void setClientName(String clientName) {
-        this.clientName = clientName;
-    }
-
-    public String getClientTaxId() {
-        return clientTaxId;
-    }
-
-    public void setClientTaxId(String clientTaxId) {
-        this.clientTaxId = clientTaxId;
-    }
-
-    public Order getOrder() {
-        return order;
-    }
-
-    public void setOrder(Order order) {
-        this.order = order;
-    }
-
-    public BigDecimal getSubtotal() {
-        return subtotal;
-    }
-
-    public void setSubtotal(BigDecimal subtotal) {
-        this.subtotal = subtotal;
-    }
-
-    public BigDecimal getTax() {
-        return tax;
-    }
-
-    public void setTax(BigDecimal tax) {
-        this.tax = tax;
-    }
-
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public void setTotal(BigDecimal total) {
-        this.total = total;
-    }
+    public LocalDateTime getIssueDate() { return issueDate; }
+    public void setIssueDate(LocalDateTime issueDate) { this.issueDate = issueDate; }
+    public double getSubtotal() { return subtotal; }
+    public double getTaxAmount() { return taxAmount; }
+    public double getTotalAmount() { return totalAmount; }
 }

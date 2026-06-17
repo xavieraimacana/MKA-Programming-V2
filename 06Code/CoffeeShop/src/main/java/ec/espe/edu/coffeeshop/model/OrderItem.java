@@ -1,57 +1,44 @@
 package ec.espe.edu.coffeeshop.model;
-
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Represents an item within an order.
- * 
- * @author Mateo Artieda, MKA Programmer, @ESPE
- */
 public class OrderItem {
     private Product product;
     private int quantity;
-    private BigDecimal pricePaidSnapshot;
-    private List<Modifier> modifiers = new ArrayList<>();
-
-    public OrderItem() {}
-
-    public OrderItem(Product product, int quantity, BigDecimal pricePaidSnapshot) {
+    private double subtotal;
+    private List<OrderItemModifier> modifiers;
+    public OrderItem(Product product, int quantity) {
         this.product = product;
         this.quantity = quantity;
-        this.pricePaidSnapshot = pricePaidSnapshot;
+        this.modifiers = new ArrayList<>();
+        calculateSubtotal();
     }
-
-    public Product getProduct() {
-        return product;
+    public void addModifier(OrderItemModifier modifier) {
+        this.modifiers.add(modifier);
+        calculateSubtotal();
     }
-
-    public void setProduct(Product product) {
-        this.product = product;
+    public void calculateSubtotal() {
+        double modifiersTotal = 0;
+        if (modifiers != null) {
+            for (OrderItemModifier modifier : modifiers) {
+                modifiersTotal += modifier.getAppliedPrice();
+            }
+        }
+        this.subtotal = (product.getBasePrice() + modifiersTotal) * quantity;
     }
-
-    public int getQuantity() {
-        return quantity;
+    public Product getProduct() { return product; }
+    public void setProduct(Product product) { 
+        this.product = product; 
+        calculateSubtotal();
     }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { 
+        this.quantity = quantity; 
+        calculateSubtotal();
     }
-
-    public BigDecimal getPricePaidSnapshot() {
-        return pricePaidSnapshot;
-    }
-
-    public void setPricePaidSnapshot(BigDecimal pricePaidSnapshot) {
-        this.pricePaidSnapshot = pricePaidSnapshot;
-    }
-
-    public List<Modifier> getModifiers() {
-        return modifiers;
-    }
-
-    public void setModifiers(List<Modifier> modifiers) {
-        this.modifiers = modifiers;
+    public double getSubtotal() { return subtotal; }
+    public List<OrderItemModifier> getModifiers() { return modifiers; }
+    public void setModifiers(List<OrderItemModifier> modifiers) { 
+        this.modifiers = modifiers; 
+        calculateSubtotal();
     }
 }

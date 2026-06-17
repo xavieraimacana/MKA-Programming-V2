@@ -1,213 +1,191 @@
 package ec.espe.edu.coffeeshop.utils;
-
-import ec.espe.edu.coffeeshop.model.*;
-import ec.espe.edu.coffeeshop.payment.CashPayment;
-import ec.espe.edu.coffeeshop.repository.*;
-
-import java.math.BigDecimal;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
+import java.util.Arrays;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-/**
- * Utility to seed all 11 classes/collections in MongoDB if they are empty.
- * Ensures the database is fully initialized with valid demo data.
- * 
- * @author MKA Programmers, ESPE
- */
 public class DatabaseSeeder {
-
     public static void seed() {
-        try {
-            System.out.println("=== STARTING DATABASE SEEDING PROCESS ===");
-
-            // 1. Seed Employees
-            MongoEmployeeRepository employeeRepo = new MongoEmployeeRepository();
-            if (employeeRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Employees...");
-                employeeRepo.save(new Employee("1", "Anthony Aimacaña", EmployeeRole.MANAGER, "anthony", PasswordHasher.hashPassword("mka123"), true));
-                employeeRepo.save(new Employee("2", "Mateo Artieda", EmployeeRole.CASHIER, "mateo", PasswordHasher.hashPassword("mateo123"), true));
-                employeeRepo.save(new Employee("3", "Kevin Albán", EmployeeRole.BARISTA, "kevin", PasswordHasher.hashPassword("kevin123"), true));
-                employeeRepo.save(new Employee("4", "Waiter User", EmployeeRole.WAITER, "waiter", PasswordHasher.hashPassword("waiter123"), true));
-            }
-
-            // Migración automática de contraseñas de empleados si hay alguna en texto plano
-            for (Employee emp : employeeRepo.findAll()) {
-                if (emp.getPassword() != null && !emp.getPassword().startsWith("$2a$")) {
-                    emp.setPassword(PasswordHasher.hashPassword(emp.getPassword()));
-                    employeeRepo.save(emp);
-                }
-            }
-            System.out.println("-> Employees: OK.");
-
-            // 2. Seed Ingredients
-            MongoIngredientRepository ingRepo = new MongoIngredientRepository();
-            if (ingRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Ingredients...");
-                ingRepo.save(new Ingredient("1", "Coffee Beans", 10.0, 2.0));
-                ingRepo.save(new Ingredient("2", "Whole Milk", 20.0, 5.0));
-                ingRepo.save(new Ingredient("3", "Refined Sugar", 5.0, 1.0));
-                ingRepo.save(new Ingredient("4", "Filtered Water", 100.0, 10.0));
-                ingRepo.save(new Ingredient("5", "Chocolate Powder", 3.0, 0.5));
-            }
-            System.out.println("-> Ingredients: OK.");
-
-            // 3. Seed Equipments
-            MongoEquipmentRepository eqRepo = new MongoEquipmentRepository();
-            if (eqRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Equipments...");
-                eqRepo.save(new Equipment("1", "Espresso Machine", EquipmentStatus.OPERATIONAL, new Date()));
-                eqRepo.save(new Equipment("2", "Coffee Grinder", EquipmentStatus.OPERATIONAL, new Date()));
-                eqRepo.save(new Equipment("3", "Milk Frother", EquipmentStatus.OPERATIONAL, new Date()));
-            }
-            System.out.println("-> Equipments: OK.");
-
-            // 4. Seed Products (with Recipes)
-            MongoProductRepository prodRepo = new MongoProductRepository();
-            if (prodRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Products & Recipes...");
-                Ingredient coffeeBeans = ingRepo.findById("1");
-                Ingredient milk = ingRepo.findById("2");
-                Ingredient sugar = ingRepo.findById("3");
-                Ingredient water = ingRepo.findById("4");
-                Ingredient chocolate = ingRepo.findById("5");
-
-                // Espresso
-                Recipe rEsp = new Recipe();
-                rEsp.setId("rec_esp");
-                rEsp.getItems().add(new RecipeItem(coffeeBeans, 0.02));
-                rEsp.getItems().add(new RecipeItem(water, 0.05));
-                Product esp = new Product("1", "Espresso", new BigDecimal("1.50"), ProductCategory.BEVERAGE, rEsp) {};
-                prodRepo.save(esp);
-
-                // Americano
-                Recipe rAm = new Recipe();
-                rAm.setId("rec_am");
-                rAm.getItems().add(new RecipeItem(coffeeBeans, 0.02));
-                rAm.getItems().add(new RecipeItem(water, 0.15));
-                Product am = new Product("2", "Americano", new BigDecimal("2.00"), ProductCategory.BEVERAGE, rAm) {};
-                prodRepo.save(am);
-
-                // Cappuccino
-                Recipe rCap = new Recipe();
-                rCap.setId("rec_cap");
-                rCap.getItems().add(new RecipeItem(coffeeBeans, 0.02));
-                rCap.getItems().add(new RecipeItem(milk, 0.10));
-                rCap.getItems().add(new RecipeItem(water, 0.05));
-                rCap.getItems().add(new RecipeItem(sugar, 0.01));
-                Product cap = new Product("3", "Cappuccino", new BigDecimal("2.75"), ProductCategory.BEVERAGE, rCap) {};
-                prodRepo.save(cap);
-
-                // Chocolate Caliente
-                Recipe rChoc = new Recipe();
-                rChoc.setId("rec_choc");
-                rChoc.getItems().add(new RecipeItem(chocolate, 0.02));
-                rChoc.getItems().add(new RecipeItem(milk, 0.20));
-                Product choc = new Product("4", "Hot Chocolate", new BigDecimal("2.50"), ProductCategory.BEVERAGE, rChoc) {};
-                prodRepo.save(choc);
-            }
-            System.out.println("-> Products: OK.");
-
-            // 5. Seed Customers (CRM)
-            MongoCustomerRepository custRepo = new MongoCustomerRepository();
-            if (custRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Customers...");
-                custRepo.save(new Customer("1", "Consumidor Final", "9999999999", "consumidor@final.com"));
-                custRepo.save(new Customer("2", "Anthony Aimacaña", "1712345678", "anthony@espe.edu.ec"));
-                custRepo.save(new Customer("3", "Mateo Artieda", "1787654321", "mateo@espe.edu.ec"));
-            }
-            System.out.println("-> Customers: OK.");
-
-            // 6. Seed Tables
-            MongoTableRepository tableRepo = new MongoTableRepository();
-            if (tableRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Tables...");
-                tableRepo.save(new Table("1", 1, 2, TableStatus.FREE));
-                tableRepo.save(new Table("2", 2, 4, TableStatus.FREE));
-                tableRepo.save(new Table("3", 3, 4, TableStatus.FREE));
-                tableRepo.save(new Table("4", 4, 6, TableStatus.FREE));
-                tableRepo.save(new Table("5", 5, 2, TableStatus.FREE));
-            }
-            System.out.println("-> Tables: OK.");
-
-            // 7. Seed Orders
-            MongoOrderRepository orderRepo = new MongoOrderRepository();
-            if (orderRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Orders...");
-                Order dummyOrder = new Order("dummy_order_id", LocalDateTime.now(), OrderStatus.READY);
-                dummyOrder.setClient(custRepo.findById("1"));
-                
-                Product cappuccino = prodRepo.findById("3");
-                OrderItem dummyItem = new OrderItem(cappuccino, 1, new BigDecimal("2.75"));
-                dummyOrder.getItems().add(dummyItem);
-                
-                dummyOrder.setSubtotal(new BigDecimal("2.46"));
-                dummyOrder.setTax(new BigDecimal("0.29"));
-                dummyOrder.setDiscount(BigDecimal.ZERO);
-                dummyOrder.setTotal(new BigDecimal("2.75"));
-                
-                CashPayment cashPay = new CashPayment(new BigDecimal("2.75"), new BigDecimal("5.00"));
-                dummyOrder.setPayment(cashPay);
-                
-                orderRepo.save(dummyOrder);
-            }
-            System.out.println("-> Orders: OK.");
-
-            // 8. Seed Invoices
-            MongoInvoiceRepository invoiceRepo = new MongoInvoiceRepository();
-            if (invoiceRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Invoices...");
-                Order order = orderRepo.findById("dummy_order_id");
-                if (order != null) {
-                    Invoice dummyInvoice = new Invoice("dummy_invoice_id", "INV-2026-00001", order);
-                    invoiceRepo.save(dummyInvoice);
-                }
-            }
-            System.out.println("-> Invoices: OK.");
-
-            // 9. Seed Reservations
-            MongoReservationRepository reservationRepo = new MongoReservationRepository();
-            if (reservationRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Reservations...");
-                Reservation dummyReservation = new Reservation("dummy_res_id", "1", "Anthony Aimacaña", LocalDateTime.now().plusHours(2), 2);
-                reservationRepo.save(dummyReservation);
-            }
-            System.out.println("-> Reservations: OK.");
-
-            // 10. Seed Shifts
-            MongoShiftRepository shiftRepo = new MongoShiftRepository();
-            if (shiftRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Shifts...");
-                Shift dummyShift = new Shift("dummy_shift_id", "Mateo Artieda", new BigDecimal("50.00"));
-                dummyShift.setEndTime(LocalDateTime.now());
-                dummyShift.setDeclaredEndingCash(new BigDecimal("52.75"));
-                dummyShift.setSystemEndingCash(new BigDecimal("52.75"));
-                dummyShift.setDifference(BigDecimal.ZERO);
-                dummyShift.setReconciliationStatus(ReconciliationStatus.BALANCED);
-                shiftRepo.save(dummyShift);
-            }
-            System.out.println("-> Shifts: OK.");
-
-            // 11. Seed Purchase Orders
-            MongoPurchaseOrderRepository poRepo = new MongoPurchaseOrderRepository();
-            if (poRepo.findAll().isEmpty()) {
-                System.out.println("Seeding Purchase Orders...");
-                PurchaseOrder dummyPO = new PurchaseOrder("dummy_po_id", "Coffee Supplier S.A.", new Date(), new BigDecimal("45.00"), PurchaseOrderStatus.DELIVERED);
-                
-                Ingredient coffeeBeans = ingRepo.findById("1");
-                if (coffeeBeans != null) {
-                    PurchaseOrderItem poItem = new PurchaseOrderItem(coffeeBeans, 5.0);
-                    dummyPO.getItemsToBuy().add(poItem);
-                }
-                poRepo.save(dummyPO);
-            }
-            System.out.println("-> Purchase Orders: OK.");
-
-            System.out.println("=== DATABASE SEEDING COMPLETED SUCCESSFULLY ===");
-        } catch (Exception e) {
-            System.err.println("Database seeding failed: " + e.getMessage());
-            e.printStackTrace();
+        MongoDatabase db = MongoDBConnection.getDatabase();
+        System.out.println("Starting Database Seeding...");
+        MongoCollection<Document> employees = db.getCollection("Employees");
+        if (employees.countDocuments() == 0) {
+            employees.insertMany(Arrays.asList(
+                new Document("_id", "EMP-001")
+                        .append("employeeId", "EMP-001")
+                        .append("name", "System Admin")
+                        .append("username", "admin") 
+                        .append("password", "admin123") 
+                        .append("role", "MANAGER"),
+                new Document("_id", "EMP-002")
+                        .append("employeeId", "EMP-002")
+                        .append("name", "John Barista")
+                        .append("username", "john")
+                        .append("password", "1234")
+                        .append("role", "BARISTA")
+            ));
+            System.out.println("-> Seeded Employees collection.");
         }
+        MongoCollection<Document> customers = db.getCollection("Customers");
+        if (customers.countDocuments() == 0) {
+            customers.insertMany(Arrays.asList(
+                new Document("_id", "CUST-001")
+                        .append("customerId", "CUST-001")
+                        .append("name", "Alice Smith")
+                        .append("taxId", "1720000001")
+                        .append("loyaltyPoints", 150)
+            ));
+            System.out.println("-> Seeded Customers collection.");
+        }
+        MongoCollection<Document> suppliers = db.getCollection("Suppliers");
+        if (suppliers.countDocuments() == 0) {
+            suppliers.insertMany(Arrays.asList(
+                new Document("_id", "SUP-001")
+                        .append("supplierId", "SUP-001")
+                        .append("companyName", "Global Coffee Beans Ltd.")
+            ));
+            System.out.println("-> Seeded Suppliers collection.");
+        }
+        MongoCollection<Document> cashSessions = db.getCollection("CashRegisterSessions");
+        if (cashSessions.countDocuments() == 0) {
+            cashSessions.insertOne(
+                new Document("_id", "CRS-001")
+                        .append("sessionId", "CRS-001")
+                        .append("openingTime", LocalDateTime.now().minusHours(4).toString())
+                        .append("closingTime", "")
+                        .append("startingFloat", 150.00)
+                        .append("expectedSystemCash", 150.00)
+                        .append("declaredPhysicalCash", 0.0)
+                        .append("discrepancyAmount", 0.0)
+            );
+            System.out.println("-> Seeded CashRegisterSessions collection.");
+        }
+        MongoCollection<Document> products = db.getCollection("Products");
+        if (products.countDocuments() == 0) {
+            products.insertMany(Arrays.asList(
+                new Document("_id", "PROD-001")
+                        .append("productId", "PROD-001")
+                        .append("name", "Caramel Macchiato")
+                        .append("basePrice", 4.50)
+                        .append("available", true)
+            ));
+            System.out.println("-> Seeded Products collection.");
+        }
+        MongoCollection<Document> prodMods = db.getCollection("ProductModifiers");
+        if (prodMods.countDocuments() == 0) {
+            prodMods.insertOne(
+                new Document("_id", "PM-001")
+                        .append("modifierId", "PM-001")
+                        .append("name", "Extra Vanilla Syrup")
+                        .append("additionalPrice", 0.50)
+            );
+            System.out.println("-> Seeded ProductModifiers collection.");
+        }
+        MongoCollection<Document> recipes = db.getCollection("Recipes");
+        if (recipes.countDocuments() == 0) {
+            recipes.insertOne(
+                new Document("_id", "REC-001")
+                        .append("recipeId", "REC-001")
+                        .append("instructions", "1. Brew espresso. 2. Steam milk. 3. Add syrup.")
+            );
+            System.out.println("-> Seeded Recipes collection.");
+        }
+        MongoCollection<Document> recipeIng = db.getCollection("RecipeIngredients");
+        if (recipeIng.countDocuments() == 0) {
+            recipeIng.insertOne(
+                new Document("_id", "RI-001")
+                        .append("requiredQuantity", 200.0)
+                        .append("unit", "MILLILITERS")
+            );
+            System.out.println("-> Seeded RecipeIngredients collection.");
+        }
+        MongoCollection<Document> inventory = db.getCollection("InventoryItems");
+        if (inventory.countDocuments() == 0) {
+            inventory.insertOne(
+                new Document("_id", "INV-001")
+                        .append("itemId", "INV-001")
+                        .append("name", "Whole Milk")
+                        .append("baseUnit", "LITERS")
+                        .append("currentStock", 20.0)
+                        .append("minThreshold", 5.0)
+            );
+            System.out.println("-> Seeded InventoryItems collection.");
+        }
+        MongoCollection<Document> invTrans = db.getCollection("InventoryTransactions");
+        if (invTrans.countDocuments() == 0) {
+            invTrans.insertOne(
+                new Document("_id", "IT-001")
+                        .append("transactionId", "IT-001")
+                        .append("date", LocalDateTime.now().toString())
+                        .append("type", "STOCK_IN")
+                        .append("quantityChange", 10.0)
+                        .append("referenceDocumentId", "SE-001")
+            );
+            System.out.println("-> Seeded InventoryTransactions collection.");
+        }
+        MongoCollection<Document> stockEntries = db.getCollection("StockEntries");
+        if (stockEntries.countDocuments() == 0) {
+            stockEntries.insertOne(
+                new Document("_id", "SE-001")
+                        .append("entryId", "SE-001")
+                        .append("dateReceived", LocalDateTime.now().toString())
+                        .append("quantityReceived", 50.0)
+                        .append("unitReceived", "LITERS")
+                        .append("totalCost", 100.0)
+            );
+            System.out.println("-> Seeded StockEntries collection.");
+        }
+        MongoCollection<Document> orders = db.getCollection("Orders");
+        if (orders.countDocuments() == 0) {
+            orders.insertOne(
+                new Document("_id", "ORD-1001")
+                        .append("orderId", "ORD-1001")
+                        .append("orderDate", LocalDateTime.now().toString())
+                        .append("status", "COMPLETED")
+                        .append("preparationNotes", "To Go")
+            );
+            System.out.println("-> Seeded Orders collection.");
+        }
+        MongoCollection<Document> orderItems = db.getCollection("OrderItems");
+        if (orderItems.countDocuments() == 0) {
+            orderItems.insertOne(
+                new Document("_id", "OI-001")
+                        .append("quantity", 2)
+                        .append("subtotal", 9.00)
+            );
+            System.out.println("-> Seeded OrderItems collection.");
+        }
+        MongoCollection<Document> orderItemMods = db.getCollection("OrderItemModifiers");
+        if (orderItemMods.countDocuments() == 0) {
+            orderItemMods.insertOne(
+                new Document("_id", "OIM-001")
+                        .append("priceAtTimeOfOrder", 0.50)
+            );
+            System.out.println("-> Seeded OrderItemModifiers collection.");
+        }
+        MongoCollection<Document> invoices = db.getCollection("Invoices");
+        if (invoices.countDocuments() == 0) {
+            invoices.insertOne(
+                new Document("_id", "INV-1001")
+                        .append("invoiceId", "INV-1001")
+                        .append("issueDate", LocalDateTime.now().toString())
+                        .append("subtotal", 9.50)
+                        .append("taxAmount", 1.42)
+                        .append("totalAmount", 10.92)
+            );
+            System.out.println("-> Seeded Invoices collection.");
+        }
+        MongoCollection<Document> payments = db.getCollection("Payments");
+        if (payments.countDocuments() == 0) {
+            payments.insertOne(
+                new Document("_id", "PAY-001")
+                        .append("paymentId", "PAY-001")
+                        .append("amount", 10.92)
+                        .append("method", "CREDIT_CARD")
+                        .append("isSuccessful", true)
+            );
+            System.out.println("-> Seeded Payments collection.");
+        }
+        System.out.println("Database Seeding Completed Successfully.");
     }
 }

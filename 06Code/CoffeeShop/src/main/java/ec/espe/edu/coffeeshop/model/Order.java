@@ -1,122 +1,38 @@
 package ec.espe.edu.coffeeshop.model;
-
-import ec.espe.edu.coffeeshop.payment.Payment;
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
-/**
- * Represents an order in the coffee shop.
- * 
- * @author Mateo Artieda, MKA Programmer, @ESPE
- */
 public class Order {
-    private String id;
-    private LocalDateTime date;
+    private String orderId;
+    private LocalDateTime orderDate;
     private OrderStatus status;
+    private String preparationNotes;
     private List<OrderItem> items;
-    private BigDecimal subtotal;
-    private BigDecimal tax;
-    private BigDecimal discount;
-    private BigDecimal total;
-    private Customer client;
-    private Payment payment;
-
-    public Order() {
-        this.date = LocalDateTime.now();
-        this.status = OrderStatus.PENDING;
-        this.items = new ArrayList<>();
-        this.subtotal = BigDecimal.ZERO;
-        this.tax = BigDecimal.ZERO;
-        this.discount = BigDecimal.ZERO;
-        this.total = BigDecimal.ZERO;
-    }
-
-    public Order(String id, LocalDateTime date, OrderStatus status) {
-        this.id = id;
-        this.date = date;
+    public Order(String orderId, LocalDateTime orderDate, OrderStatus status, String preparationNotes) {
+        this.orderId = orderId;
+        this.orderDate = orderDate;
         this.status = status;
+        this.preparationNotes = preparationNotes;
         this.items = new ArrayList<>();
     }
-
-    public String getId() {
-        return id;
+    public void addItem(Product product, int qty) {
+        OrderItem item = new OrderItem(product, qty);
+        items.add(item);
     }
-
-    public void setId(String id) {
-        this.id = id;
+    public void removeItem(String productId) {
+        items.removeIf(item -> item.getProduct().getProductId().equals(productId));
     }
-
-    public LocalDateTime getDate() {
-        return date;
+    public void updateStatus(OrderStatus newStatus) {
+        this.status = newStatus;
     }
-
-    public void setDate(LocalDateTime date) {
-        this.date = date;
-    }
-
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(OrderStatus status) {
-        this.status = status;
-    }
-
-    public List<OrderItem> getItems() {
-        return items;
-    }
-
-    public void setItems(List<OrderItem> items) {
-        this.items = items;
-    }
-
-    public BigDecimal getSubtotal() {
-        return subtotal;
-    }
-
-    public void setSubtotal(BigDecimal subtotal) {
-        this.subtotal = subtotal;
-    }
-
-    public BigDecimal getTax() {
-        return tax;
-    }
-
-    public void setTax(BigDecimal tax) {
-        this.tax = tax;
-    }
-
-    public BigDecimal getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(BigDecimal discount) {
-        this.discount = discount;
-    }
-
-    public BigDecimal getTotal() {
-        return total;
-    }
-
-    public void setTotal(BigDecimal total) {
-        this.total = total;
-    }
-
-    public Customer getClient() {
-        return client;
-    }
-
-    public void setClient(Customer client) {
-        this.client = client;
-    }
-
-    public Payment getPayment() {
-        return payment;
-    }
-
-    public void setPayment(Payment payment) {
-        this.payment = payment;
-    }
+    public String getOrderId() { return orderId; }
+    public void setOrderId(String orderId) { this.orderId = orderId; }
+    public LocalDateTime getOrderDate() { return orderDate; }
+    public void setOrderDate(LocalDateTime orderDate) { this.orderDate = orderDate; }
+    public OrderStatus getStatus() { return status; }
+    public void setStatus(OrderStatus status) { this.status = status; }
+    public String getPreparationNotes() { return preparationNotes; }
+    public void setPreparationNotes(String preparationNotes) { this.preparationNotes = preparationNotes; }
+    public List<OrderItem> getItems() { return items; }
+    public void setItems(List<OrderItem> items) { this.items = items; }
 }
